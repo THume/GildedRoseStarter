@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
+﻿using System.Collections.Generic;
 
 namespace GildedRoseKata
 {
     public class GildedRose
     {
         IList<Item> Items;
+        const int maxQuality = 50;
+        const int minQuality = 0;
         public GildedRose(IList<Item> Items)
         {
             this.Items = Items;
@@ -14,77 +14,47 @@ namespace GildedRoseKata
 
         public void UpdateQuality()
         {
-            for (var i = 0; i < Items.Count; i++)
+            foreach (var item in Items)
             {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                {
-                    if (Items[i].Quality > 0)
-                    {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                        {
-                            Items[i].Quality = Items[i].Quality - 1;
-                        }
-                    }
-                }
-                else
-                {
-                    if (Items[i].Quality < 50)
-                    {
-                        Items[i].Quality = Items[i].Quality + 1;
+                if (item.Name.Contains("Sulfuras")) continue;
 
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].SellIn < 11)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-
-                            if (Items[i].SellIn < 6)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-                        }
-                    }
+                item.SellIn = item.SellIn - 1;
+                if (item.Name.Contains("Aged Brie"))
+                {
+                    item.Quality = item.Quality < maxQuality ? item.Quality + 1 : 50;
+                    continue;
                 }
 
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
+                if (item.Name.Contains("Backstage passes"))
                 {
-                    Items[i].SellIn = Items[i].SellIn - 1;
-                }
-
-                if (Items[i].SellIn < 0)
-                {
-                    if (Items[i].Name != "Aged Brie")
+                    if (item.SellIn < 0)
                     {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
-                        }
+                        item.Quality = 0;
                     }
                     else
                     {
-                        if (Items[i].Quality < 50)
+                        int increment = 1;
+                        if (item.SellIn < 6)
                         {
-                            Items[i].Quality = Items[i].Quality + 1;
+                            increment = 3;
                         }
+                        else if (item.SellIn < 11)
+                        {
+                            increment = 2;
+                        }
+                        item.Quality = item.Quality + increment <= maxQuality ? item.Quality + increment : 50;
                     }
+                    continue;
                 }
+
+                int depreciate = 1;
+                if (item.Name.Contains("Conjured"))
+                {
+                    depreciate = 2;
+                }
+
+                if (item.SellIn < 0) depreciate = depreciate * 2;
+                item.Quality = item.Quality - depreciate >= minQuality ? item.Quality - depreciate : 0;
             }
         }
     }
